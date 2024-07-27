@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    #messages {
+      width: 500px;
+      height: 400px;
+      padding: 10px;
+      overflow-y: scroll;
+      background-color: rgb(255, 253, 253);
+      border: 1px solid #ccc;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #messageInput {
+      width: 400px;
+      padding: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    div.message {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    div.receiver {
+      background-color: #e0e0e0;
+      text-align: left;
+    }
+
+    div.sender {
+      background-color: #81d4fa;
+      text-align: right;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="messages"></div>
+  <input type="text" id="messageInput">
+  <button onclick="sendMessage()">Send</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.min.js"></script>
+  <script>
+    var socket = io();
+
+    function sendMessage() {
+      var message = document.getElementById('messageInput').value;
+      var username = Cookies.get('username');
+      socket.emit('message', { 'message': message, 'username': username });
+      document.getElementById('messageInput').value = '';
+    }
+
+    socket.on('received_message', (data) => {
+      var message = data.message;
+      var username = data.username;
+      var messageDiv = document.getElementById('messages');
+      if (username!== Cookies.get('username')) {
+        messageDiv.innerHTML += `<div class="receiver">${username}: ${message}</div><br>`;
+      } else {
+        messageDiv.innerHTML += `<div class="sender">${message}: ${username}</div><br>`;
+      }
+    });
+
+    // 新增部分：监听输入框的回车键事件
+    document.getElementById('messageInput').addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+
+</html>
